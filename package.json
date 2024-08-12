@@ -1,6 +1,6 @@
 {
 	"name": "stock-tracker-service",
-	"version": "1.0.0",  
+	"version": "1.0.0",
 	"description": "Service for nextjs stock tracker application which assists to check the Notification settings and send message to users if needed.",
 	"main": "server.js",
 	"scripts": {
@@ -21,7 +21,8 @@
 		"jsdom": "^20.0.0",
 		"mongodb": "^5.9.1",
 		"node-cron": "^3.0.3",
-		"node-fetch": "2.0"
+		"node-fetch": "2.0",
+		"nodemailer": "^6.9.14"
 	},
 	"devDependencies": {
 		"nodemon": "^2.0.16"

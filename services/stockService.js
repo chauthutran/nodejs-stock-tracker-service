@@ -4,10 +4,13 @@ var DBServices = require("./dbService");
 const { parseISO } = require('date-fns/parseISO');
 const { format } = require('date-fns/format');
 const dbServices = new DBServices();
+const nodemailer = require('nodemailer');
 
 
 // Define the stock API URL and key (if needed)
 const STOCK_API_URL = 'http://localhost:3000/api'; // Replace with your API URL
+const EMAIL_USER = process.env.EMAIL_USER;
+const EMAIL_PASS = process.env.EMAIL_PASS;
 
 
 const runNoticationSettings = async() => {
@@ -50,7 +53,9 @@ console.log(notificationSettingList.length);
 						const stockPrice = findFromArray(stockPriceList, symbol, "symbol").regularMarketPrice;
 		console.log(`stockPrice : ${stockPrice} ---- threshold: ${threshold}`);
 						if( direction == "above" && threshold <= stockPrice ) {
-							await sendNotification(settingId, userId, `The stock '${symbol}' is now ${stockPrice}, above ${threshold} at ${getCurrentDate()}`)
+							const msg = `The stock '${symbol}' is now ${stockPrice}, above ${threshold} at ${getCurrentDate()}`;
+							await sendNotification(settingId, userId, msg);
+							await sendEmail("cthutran@gmail.com", `Notification - $[symbol]`, msg);
 							await updateNotificationSetting(userId, settingData);
 						}
 					}
@@ -86,8 +91,27 @@ const sendNotification = async(settingId, userId, message) => {
 		}
 	}
 	const addResponse = await dbServices.addDocument(payload);
-	console.log('Notification:', message);
+	console.log('Notification sent to mongodb :', message);
+
+	
 };
+
+
+const sendEmail = async (to, subject, text) => {
+	try {
+	  await transporter.sendMail({
+		from: EMAIL_USER,
+		to,
+		subject,
+		text
+	  });
+	  
+	console.log('Notification sent to email :', message);
+	} catch (error) {
+	  console.error('Error sending notification:', error);
+	  throw error;
+	}
+  };
 
 
 // Function to send notification
@@ -139,6 +163,15 @@ const getCurrentDate = () => {
 	const date = parseISO(dateStr);
 	return format(date, 'MMM dd, yyyy HH:mm');
 }
+
+const transporter = nodemailer.createTransport({
+	service: 'gmail', // Replace with your email service
+	auth: {
+	  user: EMAIL_USER,
+	  pass: EMAIL_PASS
+	}
+});
+
 
 module.exports = {
 	runNoticationSettings
