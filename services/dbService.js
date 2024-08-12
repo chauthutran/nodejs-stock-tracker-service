@@ -111,6 +111,40 @@ const DBServices = class {
 		}
 	}
 	
+	/**
+	 * @payloadJson {
+	 * 				"collectionName": "users",
+	 * 				"filter": {_id: "1234567890"}
+	 * 				"payload": {"_id": "xxx", firstName": "test1", "lastName": "last1", email": "xxxxx", "password": "yyyy"}
+	 * 			}
+	 */
+	async updateDocuments(payloadJson) {
+		var result;
+		var errMsg = "";
+		try {
+			const collection = this.openDbConnectionAndGetCollection(payloadJson.collectionName);
+			// const filter = { _id: "1234567890" };
+			/* Set the upsert option to insert a document if no documents match the filter */
+			const options = { upsert: true };
+			// Specify the update to set a value for the plot field
+			const updateDoc = { $set: payloadJson.payload };
+			// Update the first document that matches the filter
+			result = await collection.findOneAndUpdate(payloadJson.filter, updateDoc, options);
+		}
+		catch(ex) {
+			errMsg = ex.message;
+		} 
+		finally {
+			// Ensures that the client will close when you finish/error
+			this.closeConnection();
+			if( errMsg != "" ) {
+				return { status: "success", data: errMsg };
+			}
+			
+			return { status: "error", data: [result] };
+		}
+	}
+
 	// ---------------------------------------------------------------------------------------------------
 	// --- Supportive methods
 
