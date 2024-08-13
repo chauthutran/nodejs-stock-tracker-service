@@ -8,3 +8,8 @@ Set up Gmail for ngocxit1284@gmail.com:
         --> A password will be genereated
 
     3. Search "Less secure apps & your Google Account"
+
+
+
+Stock App: https://github.com/jturtler/next_stock_tracker
+Stock Notification service: https://github.com/chauthutran/nodejs-stock-tracker-service
