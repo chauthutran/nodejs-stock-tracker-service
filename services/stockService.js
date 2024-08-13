@@ -30,8 +30,7 @@ const runNoticationSettings = async() => {
 	if (settingResponse.status == "success") {
 		const useNotificationsettings = settingResponse.data;
 		let symbols = getSymbolsInSetting(useNotificationsettings);
-console.log("========== Setting symbols:");
-console.log(symbols);
+
 		if( symbols.length > 0 ) {
 			const stocksResponse = await axios.get(`${STOCK_API_URL}/stock-index?symbols=${symbols.join(",")}`);
 			const stockPriceList = stocksResponse.data;
@@ -42,7 +41,6 @@ console.log(symbols);
 					const userId = useNotificationsetting.userId;
 
 					const notificationSettingList = useNotificationsetting.notifications;
-console.log(notificationSettingList.length);
 
 					for (var j = 0; j < notificationSettingList.length; j++) {
 						const settingData = notificationSettingList[j];
@@ -51,11 +49,10 @@ console.log(notificationSettingList.length);
 						const direction = settingData.direction;
 
 						const stockPrice = findFromArray(stockPriceList, symbol, "symbol").regularMarketPrice;
-		console.log(`stockPrice : ${stockPrice} ---- threshold: ${threshold}`);
 						if( direction == "above" && threshold <= stockPrice ) {
 							const msg = `The stock '${symbol}' is now ${stockPrice}, above ${threshold} at ${getCurrentDate()}`;
 							await sendNotification(settingId, userId, msg);
-							await sendEmail("cthutran@gmail.com", `Notification - $[symbol]`, msg);
+							await sendEmail("cthutran@gmail.com", `Notification - ${symbol}`, msg);
 							await updateNotificationSetting(userId, settingData);
 						}
 					}
@@ -106,7 +103,7 @@ const sendEmail = async (to, subject, text) => {
 		text
 	  });
 	  
-	console.log('Notification sent to email :', message);
+	console.log('Notification sent to email :', text);
 	} catch (error) {
 	  console.error('Error sending notification:', error);
 	  throw error;
@@ -134,7 +131,6 @@ const updateNotificationSetting = async(userId, notification) => {
 };
 
 
-
 const findFromArray = function( list, value, propertyName )
 {
 	for( let i = 0; i < list.length; i++ )
@@ -148,6 +144,7 @@ const findFromArray = function( list, value, propertyName )
 	
 	return;
 };
+
 
 const getCurrentDate = () => {
 	const curDate = new Date();
