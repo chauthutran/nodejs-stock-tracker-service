@@ -14,31 +14,23 @@ const EMAIL_PASS = process.env.EMAIL_PASS;
 
 
 const runNoticationSettings = async() => {
-	const payload = {
-		"collectionName": "notificationsettings",
-		"payload": {
-			"notifications": {
-				"$elemMatch": {
-					"hasNewNotification": false
-				}
-			}
-		}
-	};
 
-	let settingResponse = await dbServices.findDocuments(payload);
+	const userList = await getUserList();
+	if( userList.length > 0 ) {
 
-	if (settingResponse.status == "success") {
-		const useNotificationsettings = settingResponse.data;
+		let useNotificationsettings = await getNotificationSettings();
 		let symbols = getSymbolsInSetting(useNotificationsettings);
 
 		if( symbols.length > 0 ) {
 			const stocksResponse = await axios.get(`${STOCK_API_URL}/stock-index?symbols=${symbols.join(",")}`);
 			const stockPriceList = stocksResponse.data;
 			if ( stocksResponse.status === 200 ) {
+
 				for (var i = 0; i < useNotificationsettings.length; i++) {
 					const useNotificationsetting = useNotificationsettings[i];
 					const settingId = useNotificationsetting._id;
 					const userId = useNotificationsetting.userId;
+					const email = findFromArray(userList, userId, "_id").email;
 
 					const notificationSettingList = useNotificationsetting.notifications;
 
@@ -52,7 +44,7 @@ const runNoticationSettings = async() => {
 						if( direction == "above" && threshold <= stockPrice ) {
 							const msg = `The stock '${symbol}' is now ${stockPrice}, above ${threshold} at ${getCurrentDate()}`;
 							await sendNotification(settingId, userId, msg);
-							await sendEmail("cthutran@gmail.com", `Notification - ${symbol}`, msg);
+							await sendEmail(email, `Notification - ${symbol}`, msg);
 							await updateNotificationSetting(userId, settingData);
 						}
 					}
@@ -61,6 +53,45 @@ const runNoticationSettings = async() => {
 		}
 	}
 }
+
+const getNotificationSettings = async() => {
+	console.log("---------------- Loading Notification Setting list");
+
+	// Get the Notification Settings
+	const payload = {
+		"collectionName": "notificationsettings",
+		"payload": {
+			"notifications": {
+				"$elemMatch": {
+					"hasNewNotification": false
+				}
+			}
+		}
+	};
+
+	let response = await dbServices.findDocuments(payload);
+console.log(response);
+	if (response.status == "success") return response.data;
+
+	console.log(`Error to load use list. ERROR: ${response.message}.`);
+	return [];
+}
+
+const getUserList = async() => {
+	// Get the Notification Settings
+	console.log("================== Loading user list");
+	const payload = {
+		"collectionName": "users"
+	};
+
+	let response = await dbServices.findDocuments(payload);
+	
+	if(response.status === "success" ) return response.data;
+
+	console.log(`Error to load use list. ERROR: ${response.message}.`);
+	return [];
+}
+
 
 const getSymbolsInSetting = (useNotificationsettings) => {
 	let symbols = [];
@@ -76,6 +107,8 @@ const getSymbolsInSetting = (useNotificationsettings) => {
 
 	return symbols;
 }
+
+
 // Function to send notification
 const sendNotification = async(settingId, userId, message) => {
 	const payload = {
