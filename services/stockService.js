@@ -70,7 +70,6 @@ const getNotificationSettings = async() => {
 	};
 
 	let response = await dbServices.findDocuments(payload);
-console.log(response);
 	if (response.status == "success") return response.data;
 
 	console.log(`Error to load use list. ERROR: ${response.message}.`);
