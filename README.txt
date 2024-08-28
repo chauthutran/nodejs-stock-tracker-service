@@ -9,7 +9,25 @@ Set up Gmail for ngocxit1284@gmail.com:
 
     3. Search "Less secure apps & your Google Account"
 
-
+Create "vercel.json" if we want to upload on Vercel
+*************
+{
+    "version": 2,
+    "builds": [
+      {
+        "src": "server.js",
+        "use": "@vercel/node"
+      }
+    ],
+    "routes": [
+      {
+        "src": "/(.*)",
+        "dest": "/server.js"
+      }
+    ]
+  }
+  
+*************
 
 Stock App: https://github.com/jturtler/next_stock_tracker
 Stock Notification service: https://github.com/chauthutran/nodejs-stock-tracker-service

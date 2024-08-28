@@ -8,7 +8,8 @@ const nodemailer = require('nodemailer');
 
 
 // Define the stock API URL and key (if needed)
-const STOCK_API_URL = 'http://localhost:3000/api'; // Replace with your API URL
+// const STOCK_API_URL = 'http://localhost:3000/api'; // Replace with your API URL
+const STOCK_API_URL = 'https://next-stock-index-tracker.vercel.app/api';
 const EMAIL_USER = process.env.EMAIL_USER;
 const EMAIL_PASS = process.env.EMAIL_PASS;
 
