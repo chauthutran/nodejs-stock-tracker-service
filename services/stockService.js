@@ -37,17 +37,22 @@ const runNoticationSettings = async() => {
 
 					for (var j = 0; j < notificationSettingList.length; j++) {
 						const settingData = notificationSettingList[j];
-						const symbol = settingData.symbol;
-						const threshold = settingData.threshold;
-						const direction = settingData.direction;
-
-						const stockPrice = findFromArray(stockPriceList, symbol, "symbol").regularMarketPrice;
-						if( direction == "above" && threshold <= stockPrice ) {
-							const msg = `The stock '${symbol}' is now ${stockPrice}, above ${threshold} at ${getCurrentDate()}`;
-							await sendNotification(settingId, userId, msg);
-							await sendEmail(email, `Notification - ${symbol}`, msg);
-							await updateNotificationSetting(userId, settingData);
+						const hasNewNotification = settingData.hasNewNotification;
+						if( !hasNewNotification ) {
+							const symbol = settingData.symbol;
+							const threshold = settingData.threshold;
+							const direction = settingData.direction;
+	
+							const stockPrice = findFromArray(stockPriceList, symbol, "symbol").regularMarketPrice;
+	
+							if( direction == "above" && threshold <= stockPrice ) {
+								const msg = `The stock '${symbol}' is now ${stockPrice}, above ${threshold} at ${getCurrentDate()}`;
+								await sendNotification(settingId, userId, msg);
+								await sendEmail(email, `Notification - ${symbol}`, msg);
+								await updateNotificationSetting(userId, settingData);
+							}
 						}
+						
 					}
 				}
 			}
@@ -71,6 +76,7 @@ const getNotificationSettings = async() => {
 	};
 
 	let response = await dbServices.findDocuments(payload);
+	
 	if (response.status == "success") return response.data;
 
 	console.log(`Error to load use list. ERROR: ${response.message}.`);
